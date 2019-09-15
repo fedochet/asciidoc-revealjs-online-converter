@@ -11,11 +11,13 @@
     "test": "node test.js"
   },
   "dependencies": {
-    "ejs": "^2.5.6",
-    "express": "^4.15.2"
+    "asciidoctor-reveal.js": "^2.0.0",
+    "express": "^4.15.2",
+    "express-async-wrap": "^1.0.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.4"
   },
   "devDependencies": {
-    "request": "^2.81.0",
     "tape": "^4.7.0"
   },
   "repository": {
