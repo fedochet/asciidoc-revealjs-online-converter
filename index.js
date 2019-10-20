@@ -1,6 +1,9 @@
-const express = require('express')
-const wrap = require('express-async-wrap')
+const express = require('express');
+const wrap = require('express-async-wrap');
 const request = require('request-promise');
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 const asciidoctor = require('asciidoctor.js')();
 const asciidoctorRevealjs = require('asciidoctor-reveal.js');
@@ -27,7 +30,7 @@ function conver_ascii_doc_to_slides(adoc, imagesdir) {
     backend: 'revealjs', 
     header_footer: true,
     attributes: {
-      revealjsdir: "https://cdnjs.cloudflare.com/ajax/libs/reveal.js/3.6.0/",
+      revealjsdir: `https://cdnjs.cloudflare.com/ajax/libs/reveal.js/${process.env.REVEALJS_VERSION}/`,
       imagesdir
     }
   };
