@@ -1,22 +1,21 @@
-const express = require('express');
-const wrap = require('express-async-wrap');
-const request = require('request-promise');
-const dotenv = require('dotenv');
+import express from 'express';
+import wrap from 'express-async-wrap';
+import request from 'request-promise';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
 const asciidoctor = require('asciidoctor.js')();
-const asciidoctorRevealjs = require('asciidoctor-reveal.js');
+import asciidoctorRevealjs from 'asciidoctor-reveal.js';
 asciidoctorRevealjs.register()
 
 const PORT = process.env.PORT || 5000
 
 express()
-  .get('/', wrap(async (req, res) => render_slides(req, res)))
+  .get('/', wrap(render_slides))
   .listen(PORT, () => console.log(`Listening on ${ PORT }`))
 
-
-async function render_slides(req, res) {
+async function render_slides(req: express.Request, res: express.Response) {
   const result = await request(req.query.file);
   const last_slash = req.query.file.lastIndexOf('/');
   const base_address = last_slash != -1 ? req.query.file.substring(0, last_slash) : undefined;
@@ -24,7 +23,7 @@ async function render_slides(req, res) {
   res.send(conver_ascii_doc_to_slides(result, base_address));
 }
 
-function conver_ascii_doc_to_slides(adoc, imagesdir) {
+function conver_ascii_doc_to_slides(adoc: string, imagesdir: string): string {
   const options = {
     safe: 'safe', 
     backend: 'revealjs', 
