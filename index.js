@@ -31,6 +31,7 @@ function conver_ascii_doc_to_slides(adoc, imagesdir) {
     header_footer: true,
     attributes: {
       revealjsdir: `https://cdnjs.cloudflare.com/ajax/libs/reveal.js/${process.env.REVEALJS_VERSION}/`,
+      revealjs_history: "true", // enables slide anchors in the url
       imagesdir
     }
   };
