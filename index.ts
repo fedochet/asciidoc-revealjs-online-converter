@@ -5,15 +5,15 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const asciidoctor = require('asciidoctor.js')();
-import asciidoctorRevealjs from 'asciidoctor-reveal.js';
-asciidoctorRevealjs.register()
+const asciidoctor = require('@asciidoctor/core')();
+import asciidoctorRevealjs from '@asciidoctor/reveal.js';
+asciidoctorRevealjs.register();
 
-const PORT = process.env.PORT || 5000
+const PORT = process.env.PORT || 5000;
 
 express()
   .get('/', wrap(render_slides))
-  .listen(PORT, () => console.log(`Listening on ${ PORT }`))
+  .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 async function render_slides(req: express.Request, res: express.Response) {
   const result = await request(req.query.file);
