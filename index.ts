@@ -16,6 +16,7 @@ express()
   .set('views', path.join(__dirname, '../views'))
   .set('view engine', 'ejs')
   .get('/', (_, res) => res.render('pages/index'))
+  .get('/live', (_, res) => res.render('pages/live'))
   .get('/render', wrap(render_slides))
   .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
@@ -25,12 +26,18 @@ function extract_base_address(url: string): string | undefined {
 }
 
 async function render_slides(req: express.Request, res: express.Response) {
+  const slides_source_code = req.query.text as string;
   const slides_url = req.query.url as string;
-  
-  const result = await request(slides_url);
-  const base_address = extract_base_address(slides_url);
 
-  res.send(conver_ascii_doc_to_slides(result, base_address));
+  if (slides_source_code != undefined) {    
+    res.send(conver_ascii_doc_to_slides(slides_source_code));
+  } else {
+    const slides_downloaded_source_code = await request(slides_url);
+    const base_address = extract_base_address(slides_url);
+
+    res.send(conver_ascii_doc_to_slides(slides_downloaded_source_code, base_address))
+  }
+
 }
 
 function conver_ascii_doc_to_slides(adoc: string, imagesdir?: string): string {

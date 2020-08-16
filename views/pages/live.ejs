@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Slides online editor</title>
+
+	<script>
+		window.onload = function() {
+			document.querySelector("#slides-source-code-form").addEventListener("submit", function(e) {
+				var slidesSourceCode = e.target.elements.text.value;
+				var addressToRenderSlides = "/render?text=" + encodeURI(slidesSourceCode)
+				
+				document.querySelector("#rendered-slides-iframe").src = addressToRenderSlides;
+			});
+		};
+	</script>
+</head>
+<body>
+	<h1>Asciidoc-Revealjs Converter Online editor</h1>
+	<div style="float: left; width: 49%">
+		<form id="slides-source-code-form" onsubmit="return false;">
+			<p><textarea rows="10" cols="90" name="text"></textarea></p>
+			<p><input type="submit" value="Render"></p>
+		  </form>
+	</div>
+	<iframe id="rendered-slides-iframe" style="float: left; width: 50vw; height: 30vw" src=""></iframe>
+</body>
+</html>
