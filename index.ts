@@ -2,6 +2,7 @@ import express from 'express';
 import wrap from 'express-async-wrap';
 import request from 'request-promise';
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
@@ -12,7 +13,10 @@ asciidoctorRevealjs.register();
 const PORT = process.env.PORT || 5000;
 
 express()
-  .get('/', wrap(render_slides))
+  .set('views', path.join(__dirname, '../views'))
+  .set('view engine', 'ejs')
+  .get('/', (_, res) => res.render('pages/index'))
+  .get('/render', wrap(render_slides))
   .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 function extract_base_address(url: string): string | undefined {
