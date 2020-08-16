@@ -25,7 +25,7 @@ function extract_base_address(url: string): string | undefined {
 }
 
 async function render_slides(req: express.Request, res: express.Response) {
-  const slides_url = req.query.url
+  const slides_url = req.query.url as string;
   
   const result = await request(slides_url);
   const base_address = extract_base_address(slides_url);
