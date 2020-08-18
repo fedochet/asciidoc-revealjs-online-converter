@@ -9,7 +9,7 @@
 		window.onload = function() {
 			document.querySelector("#slides-source-code-form").addEventListener("submit", function(e) {
 				var slidesSourceCode = e.target.elements.text.value;
-				var addressToRenderSlides = "/render?text=" + encodeURI(slidesSourceCode)
+				var addressToRenderSlides = "/render?text=" + encodeURIComponent(slidesSourceCode);
 				
 				document.querySelector("#rendered-slides-iframe").src = addressToRenderSlides;
 			});
