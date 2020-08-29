@@ -19,16 +19,11 @@
 			return url.substring(poundIdx + 2);
 		}
 
-		function getSlidesSourceCodeForm(document) {
-			return document.querySelector("#slides-source-code-form");
-		}
-
 		function getRenderedSlidesIframe(document) {
 			return document.querySelector("#rendered-slides-iframe");
 		}
 
-		function renderCurrenSlides(e) {
-			var slidesSourceCode = getSlidesSourceCodeForm(document).text.value;
+		function renderSlidesToIframe(slidesSourceCode) {
 			var newSlidesAddress = "/render?text=" + encodeURIComponent(slidesSourceCode);
 
 			var slidesFrame = getRenderedSlidesIframe(document);
@@ -39,21 +34,27 @@
 		}
 
 		window.onload = function() {			
-			var slidesSourceCodeForm = getSlidesSourceCodeForm(document);
-			
-			slidesSourceCodeForm.addEventListener("submit", renderCurrenSlides);
-			slidesSourceCodeForm.addEventListener("input", _.debounce(renderCurrenSlides, RENDER_SLIDES_AFTER_CHANGES_TIMEOUT));
+			var slidesSourceCodeForm = document.querySelector("#slides-source-code-form");
+            
+            function fetchAndRenderSlides(e) {
+                renderSlidesToIframe(slidesSourceCodeForm.text.value);
+            }
+
+			slidesSourceCodeForm.addEventListener("submit", fetchAndRenderSlides);
+			slidesSourceCodeForm.addEventListener("input", _.debounce(fetchAndRenderSlides, RENDER_SLIDES_AFTER_CHANGES_TIMEOUT));
 		};
 	</script>
 </head>
 <body>
-	<h1>Asciidoc-Revealjs Converter Online editor</h1>
-	<div style="float: left; width: 49%">
-		<form id="slides-source-code-form" onsubmit="return false;">
-			<p><textarea rows="10" cols="90" name="text"></textarea></p>
-			<p><input type="submit" value="Render"></p>
-		  </form>
-	</div>
-	<iframe id="rendered-slides-iframe" style="float: left; width: 50vw; height: 30vw" src=""></iframe>
+    <h1>Asciidoc-Revealjs Converter Online editor</h1>
+    <div style="display: flex">
+        <div style="flex:50%; height: 600px">
+            <form id="slides-source-code-form" onsubmit="return false;">
+                <p><textarea rows="10" cols="90" name="text"></textarea></p>
+                <p><input type="submit" value="Render"></p>
+              </form>
+        </div>    
+        <iframe id="rendered-slides-iframe" style="flex:50%" src=""></iframe>
+    </div>
 </body>
 </html>
