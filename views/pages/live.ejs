@@ -5,7 +5,9 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Slides online editor</title>
 
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/lodash@4.17.20/lodash.min.js"></script>
 	<script>
+		var RENDER_SLIDES_AFTER_CHANGES_TIMEOUT = 1000;
 		var SLIDE_ANCHOR_SEPARATOR = "#/";
 
 		function extractCurrentSlideAnchor(url) {
@@ -27,19 +29,20 @@
 
 		function renderCurrenSlides(e) {
 			var slidesSourceCode = getSlidesSourceCodeForm(document).text.value;
-				var newSlidesAddress = "/render?text=" + encodeURIComponent(slidesSourceCode);
+			var newSlidesAddress = "/render?text=" + encodeURIComponent(slidesSourceCode);
 
 			var slidesFrame = getRenderedSlidesIframe(document);
-				var currentSlidesAddress = slidesFrame.contentWindow.location.href;
-				var currentSlideAnchor = extractCurrentSlideAnchor(currentSlidesAddress);
-				
-				slidesFrame.src = newSlidesAddress + SLIDE_ANCHOR_SEPARATOR + currentSlideAnchor;
+			var currentSlidesAddress = slidesFrame.contentWindow.location.href;
+			var currentSlideAnchor = extractCurrentSlideAnchor(currentSlidesAddress);
+			
+			slidesFrame.src = newSlidesAddress + SLIDE_ANCHOR_SEPARATOR + currentSlideAnchor;
 		}
 
 		window.onload = function() {			
 			var slidesSourceCodeForm = getSlidesSourceCodeForm(document);
 			
 			slidesSourceCodeForm.addEventListener("submit", renderCurrenSlides);
+			slidesSourceCodeForm.addEventListener("input", _.debounce(renderCurrenSlides, RENDER_SLIDES_AFTER_CHANGES_TIMEOUT));
 		};
 	</script>
 </head>
