@@ -17,17 +17,29 @@
 			return url.substring(poundIdx + 2);
 		}
 
-		window.onload = function() {
-			document.querySelector("#slides-source-code-form").addEventListener("submit", function(e) {
-				var slidesSourceCode = e.target.elements.text.value;
+		function getSlidesSourceCodeForm(document) {
+			return document.querySelector("#slides-source-code-form");
+		}
+
+		function getRenderedSlidesIframe(document) {
+			return document.querySelector("#rendered-slides-iframe");
+		}
+
+		function renderCurrenSlides(e) {
+			var slidesSourceCode = getSlidesSourceCodeForm(document).text.value;
 				var newSlidesAddress = "/render?text=" + encodeURIComponent(slidesSourceCode);
 
-				var slidesFrame = document.querySelector("#rendered-slides-iframe");
+			var slidesFrame = getRenderedSlidesIframe(document);
 				var currentSlidesAddress = slidesFrame.contentWindow.location.href;
 				var currentSlideAnchor = extractCurrentSlideAnchor(currentSlidesAddress);
 				
 				slidesFrame.src = newSlidesAddress + SLIDE_ANCHOR_SEPARATOR + currentSlideAnchor;
-			});
+		}
+
+		window.onload = function() {			
+			var slidesSourceCodeForm = getSlidesSourceCodeForm(document);
+			
+			slidesSourceCodeForm.addEventListener("submit", renderCurrenSlides);
 		};
 	</script>
 </head>
