@@ -7,7 +7,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "node build/index.js",
+    "start": "node --max-http-header-size 160000 build/index.js",
     "postinstall": "tsc",
     "tsc": "tsc"
   },
