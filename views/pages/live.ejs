@@ -57,14 +57,27 @@
             return document.querySelector("#rendered-slides-iframe");
         }
 
-        function renderSlidesToIframe(slidesSourceCode) {
-            var newSlidesAddress = "/render?text=" + encodeURIComponent(slidesSourceCode);
+        function saveSlidesToServer(slidesSourceCode, callback) {
+            fetch("save", { 
+                method: "POST", 
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: slidesSourceCode }) 
+            }).then((response) => response.text().then(callback));
+        }
 
+        function renderSlidesToIframe(slidesSourceCode) {
             var slidesFrame = getRenderedSlidesIframe(document);
             var currentSlidesAddress = slidesFrame.contentWindow.location.href;
             var currentSlideAnchor = extractCurrentSlideAnchor(currentSlidesAddress);
-            
-            slidesFrame.src = newSlidesAddress + SLIDE_ANCHOR_SEPARATOR + currentSlideAnchor;
+
+            saveSlidesToServer(slidesSourceCode, (saved_slides_id) => {
+                var newSlidesAddress = "/render?slides_id=" + saved_slides_id;
+
+                slidesFrame.src = newSlidesAddress + SLIDE_ANCHOR_SEPARATOR + currentSlideAnchor;
+            })
         }
 
         require(["vs/editor/editor.main"], function () {
