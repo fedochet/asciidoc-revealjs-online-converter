@@ -21,7 +21,7 @@ express()
   .get('/', (_, res) => res.render('pages/index'))
   .get('/live', (_, res) => res.render('pages/live'))
   .get('/render', wrap(handle_render_slides))
-  .post('/save', wrap(save_slides_text))
+  .post('/save', wrap(handle_save_slides))
   .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 function extract_base_address(url: string): string | undefined {
@@ -32,7 +32,7 @@ function extract_base_address(url: string): string | undefined {
 type RenderRequest = {
   readonly text?: string;
   readonly url?: string;
-  readonly slides_id?: string; 
+  readonly slides_id?: SlidesId; 
 }
 
 async function handle_render_slides(req: express.Request, res: express.Response) {
@@ -72,16 +72,26 @@ function conver_ascii_doc_to_slides(adoc: string, imagesdir?: string): string {
   return asciidoctor.convert(adoc, options);
 }
 
+type SaveSlidesRequest = {
+  readonly text: string;
+}
+
+type SlidesId = string;
+
 // TODO: replace with RLU cache
-const saved_slides_cache = new Map<string, string>();
+const saved_slides_cache = new Map<SlidesId, string>();
 
-async function save_slides_text(req: express.Request, res: express.Response) {
-  const slides_source_code = req.body.text;
-  const slides_id = hash(slides_source_code);
-
-  saved_slides_cache.set(slides_id, slides_source_code);
-
+async function handle_save_slides(req: express.Request, res: express.Response) {
+  const slides_id = save_slides_text(req.body);
   res.end(slides_id);
+}
+
+function save_slides_text(query: SaveSlidesRequest): SlidesId {
+  const slides_id = hash(query.text);
+
+  saved_slides_cache.set(slides_id, query.text);
+
+  return slides_id;
 }
 
 function hash(text: string): string {
