@@ -100,25 +100,24 @@ function getRenderedSlidesIframe(document: Document): HTMLIFrameElement {
   return document.querySelector("#rendered-slides-iframe") as HTMLIFrameElement;
 }
 
-function saveSlidesToServer(slidesSourceCode: string, callback: (saved_slides_id: string) => void) {
-  fetch("save", { 
+async function saveSlidesToServer(slidesSourceCode: string): Promise<string> {
+  return fetch("save", { 
       method: "POST", 
       headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json'
       },
       body: JSON.stringify({ text: slidesSourceCode }) 
-  }).then((response) => response.text().then(callback));
+  }).then((response) => response.text());
 }
 
-function renderSlidesToIframe(slidesSourceCode: string) {
+async function renderSlidesToIframe(slidesSourceCode: string) {
   const slidesFrame = getRenderedSlidesIframe(document);
   const currentSlidesAddress = slidesFrame.contentWindow!!.location.href;
   const currentSlideAnchor = extractCurrentSlideAnchor(currentSlidesAddress);
 
-  saveSlidesToServer(slidesSourceCode, (saved_slides_id: string) => {
-      const newSlidesAddress = `/render?slides_id=${saved_slides_id}`;
+  const savedSlidesId = await saveSlidesToServer(slidesSourceCode);
 
-      slidesFrame.src = newSlidesAddress + SLIDE_ANCHOR_SEPARATOR + currentSlideAnchor;
-  })
+  const newSlidesAddress = `/render?slides_id=${savedSlidesId}`;
+  slidesFrame.src = newSlidesAddress + SLIDE_ANCHOR_SEPARATOR + currentSlideAnchor;
 }
