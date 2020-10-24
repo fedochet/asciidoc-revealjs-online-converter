@@ -87,8 +87,8 @@ const SAMPLE_SLIDES_TEXT = [
 const RENDER_SLIDES_AFTER_CHANGES_TIMEOUT = 1000;
 const SLIDE_ANCHOR_SEPARATOR = "#/";
 
-function extractCurrentSlideAnchor(url: any) {
-  var poundIdx = url.lastIndexOf(SLIDE_ANCHOR_SEPARATOR);
+function extractCurrentSlideAnchor(url: string): string {
+  const poundIdx = url.lastIndexOf(SLIDE_ANCHOR_SEPARATOR);
   if (poundIdx === -1) {
       return "";
   }
@@ -96,11 +96,11 @@ function extractCurrentSlideAnchor(url: any) {
   return url.substring(poundIdx + 2);
 }
 
-function getRenderedSlidesIframe(document: any) {
-  return document.querySelector("#rendered-slides-iframe");
+function getRenderedSlidesIframe(document: Document): HTMLIFrameElement {
+  return document.querySelector("#rendered-slides-iframe") as HTMLIFrameElement;
 }
 
-function saveSlidesToServer(slidesSourceCode: any, callback: any) {
+function saveSlidesToServer(slidesSourceCode: string, callback: (saved_slides_id: string) => void) {
   fetch("save", { 
       method: "POST", 
       headers: {
@@ -111,13 +111,13 @@ function saveSlidesToServer(slidesSourceCode: any, callback: any) {
   }).then((response) => response.text().then(callback));
 }
 
-function renderSlidesToIframe(slidesSourceCode: any) {
-  var slidesFrame = getRenderedSlidesIframe(document);
-  var currentSlidesAddress = slidesFrame.contentWindow.location.href;
-  var currentSlideAnchor = extractCurrentSlideAnchor(currentSlidesAddress);
+function renderSlidesToIframe(slidesSourceCode: string) {
+  const slidesFrame = getRenderedSlidesIframe(document);
+  const currentSlidesAddress = slidesFrame.contentWindow!!.location.href;
+  const currentSlideAnchor = extractCurrentSlideAnchor(currentSlidesAddress);
 
-  saveSlidesToServer(slidesSourceCode, (saved_slides_id: any) => {
-      var newSlidesAddress = "/render?slides_id=" + saved_slides_id;
+  saveSlidesToServer(slidesSourceCode, (saved_slides_id: string) => {
+      const newSlidesAddress = `/render?slides_id=${saved_slides_id}`;
 
       slidesFrame.src = newSlidesAddress + SLIDE_ANCHOR_SEPARATOR + currentSlideAnchor;
   })
