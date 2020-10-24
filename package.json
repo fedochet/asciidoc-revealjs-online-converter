@@ -10,7 +10,7 @@
     "start": "node --max-http-header-size 80000 build/index.js",
     "postinstall": "tsc && npm run buildClient",
     "tsc": "tsc",
-    "buildClient": "cd client && npm install && npm run build"
+    "buildClient": "cd client && npm install --only=dev && npm install && npm run build"
   },
   "dependencies": {
     "@asciidoctor/reveal.js": "^4.0.1",
