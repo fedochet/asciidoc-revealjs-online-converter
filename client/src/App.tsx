@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
-import React from 'react';
+import React, { createRef } from 'react';
 import './App.css';
 import Editor from '@monaco-editor/react';
 import monaco from 'monaco-editor';
@@ -46,35 +46,52 @@ function Live() {
   return (
     <div>
       <h1>Asciidoc-Revealjs Converter Online editor</h1>
-      <div style={{display: "flex"}}>
-          <div id="container" style={{flex: "50%", height: "600px", border: "1px solid grey", overflow: "hidden"}}>
-            <Editor
-              language='asciidoc'
-              value={SAMPLE_SLIDES_TEXT}
-              editorDidMount={setupEditor}
-              options={{
-                wordWrap: "off"
-              }}
-            />
-          </div>
-          <iframe id="rendered-slides-iframe" title="rendered-slides-iframe" style={{flex: "50%"}} src=""></iframe>
-      </div>
+      <LiveEditingEditorComponent/>
     </div>
   );
 }
 
-export default App;
+class LiveEditingEditorComponent extends React.Component {
+  private slidesIframeRef = createRef<HTMLIFrameElement>();
 
-function setupEditor(_: any, editor: monaco.editor.ICodeEditor) {
-  function fetchAndRenderSlides() {
-    renderSlidesToIframe(editor.getValue());
+  render() {
+    return (
+      <div style={{display: "flex"}}>
+        
+        <div id="container" style={{flex: "50%", height: "600px", border: "1px solid grey", overflow: "hidden"}}>
+          <Editor
+            language='asciidoc'
+            value={SAMPLE_SLIDES_TEXT}
+            editorDidMount={(_, editor) => this.setupEditor(editor)}
+            options={{
+              wordWrap: "off"
+            }}
+          />
+        </div>
+
+        <iframe ref={this.slidesIframeRef} title="rendered-slides-iframe" style={{flex: "50%"}} src=""></iframe>
+      
+      </div>
+    );
   }
 
-  // Render current slides for the first time
-  fetchAndRenderSlides();
+  private setupEditor(editor: monaco.editor.ICodeEditor) {  
+    // Render current slides for the first time
+    this.fetchAndRenderSlides(editor);
+  
+    editor.onDidChangeModelContent(debounce(() => this.fetchAndRenderSlides(editor), RENDER_SLIDES_AFTER_CHANGES_TIMEOUT));
+  }  
 
-  editor.onDidChangeModelContent(debounce(fetchAndRenderSlides, RENDER_SLIDES_AFTER_CHANGES_TIMEOUT));
+  private fetchAndRenderSlides(editor: monaco.editor.ICodeEditor) {
+    const slidesIframe = this.slidesIframeRef.current;
+    
+    if (slidesIframe) {
+      renderSlidesToIframe(slidesIframe, editor.getValue());
+    }
+  }
 }
+
+export default App;
 
 const SAMPLE_SLIDES_TEXT = [
   '= Title slide',
@@ -96,10 +113,6 @@ function extractCurrentSlideAnchor(url: string): string {
   return url.substring(poundIdx + 2);
 }
 
-function getRenderedSlidesIframe(document: Document): HTMLIFrameElement {
-  return document.querySelector("#rendered-slides-iframe") as HTMLIFrameElement;
-}
-
 async function saveSlidesToServer(slidesSourceCode: string): Promise<string> {
   return fetch("save", { 
       method: "POST", 
@@ -111,9 +124,8 @@ async function saveSlidesToServer(slidesSourceCode: string): Promise<string> {
   }).then((response) => response.text());
 }
 
-async function renderSlidesToIframe(slidesSourceCode: string) {
-  const slidesFrame = getRenderedSlidesIframe(document);
-  const currentSlidesAddress = slidesFrame.contentWindow!!.location.href;
+async function renderSlidesToIframe(slidesFrame: HTMLIFrameElement, slidesSourceCode: string) {
+  const currentSlidesAddress = slidesFrame.contentWindow!.location.href;
   const currentSlideAnchor = extractCurrentSlideAnchor(currentSlidesAddress);
 
   const savedSlidesId = await saveSlidesToServer(slidesSourceCode);
