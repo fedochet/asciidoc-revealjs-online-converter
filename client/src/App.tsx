@@ -98,13 +98,19 @@ function Live() {
 }
 
 class LiveEditingEditorComponent extends React.Component {
-  private slidesIframeRef = createRef<HTMLIFrameElement>();
+  private readonly slidesIframeRef = createRef<HTMLIFrameElement>();
+  private readonly editorContainerStyle = { 
+    flex: "50%", 
+    height: "600px", 
+    border: "1px solid grey", 
+    overflow: "hidden" 
+  };
 
   render() {
     return (
       <div style={{display: "flex"}}>
         
-        <div id="container" style={{flex: "50%", height: "600px", border: "1px solid grey", overflow: "hidden"}}>
+        <div id="container" style={this.editorContainerStyle}>
           <Editor
             language='asciidoc'
             value={SAMPLE_SLIDES_TEXT}
