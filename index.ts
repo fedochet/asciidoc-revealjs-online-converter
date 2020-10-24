@@ -16,12 +16,12 @@ const PORT = process.env.PORT || 5000;
 
 express()
   .use(bodyParser.json())
-  .set('views', path.join(__dirname, '../views'))
-  .set('view engine', 'ejs')
-  .get('/', (_, res) => res.render('pages/index'))
-  .get('/live', (_, res) => res.render('pages/live'))
+  // Serve frontend static files
+  .use(express.static(path.join(__dirname, '../client/build')))
   .get('/render', wrap(handle_render_slides))
   .post('/save', wrap(handle_save_slides))
+  // Render built react application in production
+  .get('*', (_, res) => res.sendFile(path.join(__dirname, '../client/build/index.html')))
   .listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 function extract_base_address(url: string): string | undefined {
