@@ -28,17 +28,63 @@ function Home() {
 
       <p>This tool allows you to convert your asciidoc documents to reveal.js slides online!</p>
 
-      <form action="render">
-          <p>
-              <label htmlFor="url"><b>Enter the link to your document to the form below:</b></label>
-          </p>
-          <input type="url" name="url" placeholder="Raw github reference"></input>
-          <button formAction="render">Render slides</button>
-          <button formAction="render" name="print-pdf">Render PDF</button>
-      </form>
+      <RenderForm />
 
       <p>Or you can use <Link to="/live">online editor mode</Link>.</p>
     </div>
+  );
+}
+
+interface RenderFormElement extends HTMLFormElement {
+  readonly url: HTMLInputElement;
+  readonly separateFragments: HTMLInputElement;
+}
+
+interface RenderFormSubmitEvent extends Event {
+  readonly submitter: HTMLButtonElement;
+  readonly target: RenderFormElement;
+}
+
+function RenderForm() {
+  const RENDER_SLIDES = "renderSlides";
+  const RENDER_PDF = "renderPdf";
+
+  const handleSubmit = (e: RenderFormSubmitEvent) => {
+    e.preventDefault();
+
+    const slidesUrl = e.target.url.value;
+    const separateFragments = e.target.separateFragments.checked;
+
+    const printPdfOtption = e.submitter.value == RENDER_PDF ? "print-pdf&" : "";
+
+    window.location.href = `./render?pdfSeparateFragments=${separateFragments}&${printPdfOtption}url=${slidesUrl}`;
+  };
+
+  const passNativeEvent = (event: React.FormEvent<HTMLFormElement>) => {
+    handleSubmit(event.nativeEvent as RenderFormSubmitEvent);
+  }
+
+  return (
+    <form onSubmit={passNativeEvent}>
+      <label htmlFor="url"><b>Enter the link to your document to the form below:</b></label>
+      <br/>
+      <br/>
+      <input 
+        type="url" 
+        name="url"
+        placeholder="Raw github reference"
+        />
+      <br/>
+      <button type="submit" value={RENDER_SLIDES}>Render slides</button>
+      <br/>
+      <button type="submit" value={RENDER_PDF}>Render PDF</button>
+      <input
+        type="checkbox"
+        name="separateFragments"
+        defaultChecked={false}
+        />
+      Separate fragments to different slides
+    </form>
   );
 }
 
