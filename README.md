@@ -1,39 +1,45 @@
-# node-js-getting-started
+# Asciidoc to reveal.js online converter
 
-A barebones Node.js app using [Express 4](http://expressjs.com/).
+This tool allows to launch a site that renders asciidoc documents to reveal.js slides using [asciidoctor-revealjs](https://asciidoctor.org/docs/asciidoctor-revealjs/) converter.
 
-This application supports the [Getting Started with Node on Heroku](https://devcenter.heroku.com/articles/getting-started-with-nodejs) article - check it out.
+You can find a working example of this app on Heroku: https://asciidoc-revealjs-converter.herokuapp.com.
 
-## Running Locally
+## Project usage and idea
 
-Make sure you have [Node.js](http://nodejs.org/) and the [Heroku CLI](https://cli.heroku.com/) installed.
+This project allows you to store your presentations in `.adoc` format in some online storage (for example, on GitHub), and then render them to reveal.js presentations online on demand.
 
-```sh
-$ git clone https://github.com/heroku/node-js-getting-started.git # or clone your own fork
-$ cd node-js-getting-started
-$ npm install
-$ npm start
-```
+It also have a live-editor mode, which allows you to edit and preview your presentations online. 
 
-Your app should now be running on [localhost:5000](http://localhost:5000/).
+## Project structure
 
-## Deploying to Heroku
+`./index.ts` file is responsible for express backend. It can serve frontend files to the user, and also responsible for rendering `.adoc` into `.html` slides.
 
-```
-$ heroku create
-$ git push heroku master
-$ heroku open
-```
-or
+`./client/` folder contains a frontend React application, which consists of home page and live editor mode.
 
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.png)](https://heroku.com/deploy)
+## Development
 
-## Documentation
+In order to launch the application locally, you need:
 
-For more information about using Node.js on Heroku, see these Dev Center articles:
+* Install frontend and backend projects' dependencies:
 
-- [Getting Started with Node.js on Heroku](https://devcenter.heroku.com/articles/getting-started-with-nodejs)
-- [Heroku Node.js Support](https://devcenter.heroku.com/articles/nodejs-support)
-- [Node.js on Heroku](https://devcenter.heroku.com/categories/nodejs)
-- [Best Practices for Node.js Development](https://devcenter.heroku.com/articles/node-best-practices)
-- [Using WebSockets on Heroku with Node.js](https://devcenter.heroku.com/articles/node-websockets)
+    ```sh
+    $ npm install
+    $ cd client && npm install && cd ..
+    ```
+* Compile and start backend application:
+
+    ```sh
+    npm run tsc && npm start
+    ```
+
+    If you update the code in `./index.ts`, you need to restart the server manually.
+*  In the other console, start frontend application:
+
+    ```sh
+    cd client
+    npm start
+    ```
+
+    This should automatically take you to http://localhost:5000, where you should see a working application.
+
+    If you change `./client/` code, the application will update automatically.
