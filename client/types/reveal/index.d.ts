@@ -20,6 +20,9 @@ declare module 'reveal' {
         next():void;
         prevFragment():boolean;
         nextFragment():boolean;
+
+        // Array of all slides
+        getSlides(): Element[];
     
         // Randomize the order of slides
         shuffle():void;
