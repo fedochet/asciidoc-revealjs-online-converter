@@ -22,7 +22,6 @@
     "express-async-wrap": "^1.0.0",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
-    "sha.js": "^2.4.11",
     "typescript": "^3.7.2"
   },
   "devDependencies": {
