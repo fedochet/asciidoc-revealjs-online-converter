@@ -4,7 +4,7 @@ import './App.css';
 import Editor from '@monaco-editor/react';
 import monaco from 'monaco-editor';
 import { debounce } from 'lodash';
-
+import { RevealStatic } from 'reveal';
 
 function App() {
   return (
@@ -121,7 +121,12 @@ class LiveEditingEditorComponent extends React.Component {
           />
         </div>
 
-        <iframe ref={this.slidesIframeRef} title="rendered-slides-iframe" style={{flex: "50%"}} src=""></iframe>
+        <iframe 
+          id="rendered-slides-iframe" 
+          ref={this.slidesIframeRef} 
+          title="rendered-slides-iframe" 
+          style={{flex: "50%"}} 
+          src=""/>
       
       </div>
     );
@@ -177,11 +182,33 @@ async function saveSlidesToServer(slidesSourceCode: string): Promise<string> {
 }
 
 async function renderSlidesToIframe(slidesFrame: HTMLIFrameElement, slidesSourceCode: string) {
-  const currentSlidesAddress = slidesFrame.contentWindow!.location.href;
-  const currentSlideAnchor = extractCurrentSlideAnchor(currentSlidesAddress);
+  const currentSlideId = findRevealInstance(slidesFrame)?.getCurrentSlide()?.id;
 
   const savedSlidesId = await saveSlidesToServer(slidesSourceCode);
-
   const newSlidesAddress = `/render?slides_id=${savedSlidesId}`;
-  slidesFrame.src = newSlidesAddress + SLIDE_ANCHOR_SEPARATOR + currentSlideAnchor;
+
+  slidesFrame.src = newSlidesAddress;
+  slidesFrame.onload = function(this: HTMLIFrameElement) {
+    const revealInstance = findRevealInstance(this);
+    if (!revealInstance || !currentSlideId) return;
+
+    navigateToSlideId(revealInstance, currentSlideId);
+  } as (this: GlobalEventHandlers) => void;
+}
+
+function findRevealInstance(iframe: HTMLIFrameElement): RevealStatic | undefined {
+  type WindowsWithReveal = Window & {
+    readonly Reveal: RevealStatic;
+  };
+  
+  return (iframe.contentWindow as (WindowsWithReveal | undefined))?.Reveal;
+}
+
+function navigateToSlideId(reveal: RevealStatic, slideId: string) {
+  const slideToSelect = reveal.getSlides().find((slide) => slide.id == slideId);
+
+  if (slideToSelect) {
+    const { h, v } = reveal.getIndices(slideToSelect);
+    reveal.slide(h, v);
+  }
 }
