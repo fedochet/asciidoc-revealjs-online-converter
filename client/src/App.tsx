@@ -182,18 +182,12 @@ async function saveSlidesToServer(slidesSourceCode: string): Promise<string> {
 }
 
 async function renderSlidesToIframe(slidesFrame: HTMLIFrameElement, slidesSourceCode: string) {
-  const currentSlideId = findRevealInstance(slidesFrame)?.getCurrentSlide()?.id;
+  const currentSlideId = findRevealInstance(slidesFrame)?.getCurrentSlide()?.id ?? "";
 
   const savedSlidesId = await saveSlidesToServer(slidesSourceCode);
   const newSlidesAddress = `/render?slides_id=${savedSlidesId}`;
 
-  slidesFrame.src = newSlidesAddress;
-  slidesFrame.onload = function(this: HTMLIFrameElement) {
-    const revealInstance = findRevealInstance(this);
-    if (!revealInstance || !currentSlideId) return;
-
-    navigateToSlideId(revealInstance, currentSlideId);
-  } as (this: GlobalEventHandlers) => void;
+  slidesFrame.src = `${newSlidesAddress}#${currentSlideId}`;
 }
 
 function findRevealInstance(iframe: HTMLIFrameElement): RevealStatic | undefined {
@@ -202,13 +196,4 @@ function findRevealInstance(iframe: HTMLIFrameElement): RevealStatic | undefined
   };
   
   return (iframe.contentWindow as (WindowsWithReveal | undefined))?.Reveal;
-}
-
-function navigateToSlideId(reveal: RevealStatic, slideId: string) {
-  const slideToSelect = reveal.getSlides().find((slide) => slide.id == slideId);
-
-  if (slideToSelect) {
-    const { h, v } = reveal.getIndices(slideToSelect);
-    reveal.slide(h, v);
-  }
 }

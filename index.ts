@@ -5,6 +5,7 @@ import request from 'request-promise';
 import dotenv from 'dotenv';
 import path from 'path';
 import shajs from 'sha.js';
+import Keyv from 'keyv';
 
 dotenv.config();
 
@@ -13,6 +14,7 @@ import asciidoctorRevealjs from '@asciidoctor/reveal.js';
 asciidoctorRevealjs.register();
 
 const PORT = process.env.PORT || 5000;
+const SAVED_SLIDES_CACHE_TTL_MS = parseInt(process.env.SAVED_SLIDES_CACHE_TTL_MS ?? "10_000");
 
 express()
   .use(bodyParser.json())
@@ -52,7 +54,7 @@ async function render_slides(query: RenderRequest): Promise<string> {
     return conver_ascii_doc_to_slides(slides_downloaded_source_code, base_address);
   } 
   
-  const saved_slides_source_code = saved_slides_cache.get(query.slides_id!!) || "";
+  const saved_slides_source_code = await saved_slides_cache.get(query.slides_id!!) || "";
   
   return conver_ascii_doc_to_slides(saved_slides_source_code);
 }
@@ -79,17 +81,17 @@ type SaveSlidesRequest = {
 type SlidesId = string;
 
 // TODO: replace with RLU cache
-const saved_slides_cache = new Map<SlidesId, string>();
+const saved_slides_cache = new Keyv<string>();
 
 async function handle_save_slides(req: express.Request, res: express.Response) {
-  const slides_id = save_slides_text(req.body);
+  const slides_id = await save_slides_text(req.body);
   res.end(slides_id);
 }
 
-function save_slides_text(query: SaveSlidesRequest): SlidesId {
+async function save_slides_text(query: SaveSlidesRequest): Promise<SlidesId> {
   const slides_id = hash(query.text);
 
-  saved_slides_cache.set(slides_id, query.text);
+  await saved_slides_cache.set(slides_id, query.text, SAVED_SLIDES_CACHE_TTL_MS);
 
   return slides_id;
 }
