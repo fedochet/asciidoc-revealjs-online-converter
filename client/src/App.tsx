@@ -55,7 +55,7 @@ function RenderForm() {
     const slidesUrl = e.target.url.value;
     const separateFragments = e.target.separateFragments.checked;
 
-    const printPdfOtption = e.submitter.value === RENDER_PDF ? "print-pdf&" : "";
+    const printPdfOtption = e.submitter.value == RENDER_PDF ? "print-pdf&" : "";
 
     window.location.href = `./render?pdfSeparateFragments=${separateFragments}&${printPdfOtption}url=${slidesUrl}`;
   };
@@ -159,30 +159,35 @@ const SAMPLE_SLIDES_TEXT = [
 ].join('\n');
 
 const RENDER_SLIDES_AFTER_CHANGES_TIMEOUT = 1000;
+const SLIDE_ANCHOR_SEPARATOR = "#/";
 
-async function renderSlidesOnServer(slidesSourceCode: string): Promise<string> {
-  type RenderSlidesPostResponse = {
-    readonly renderedSlides: string;
-  }  
+function extractCurrentSlideAnchor(url: string): string {
+  const poundIdx = url.lastIndexOf(SLIDE_ANCHOR_SEPARATOR);
+  if (poundIdx === -1) {
+      return "";
+  }
 
-  return fetch("render", { 
-    method: "POST", 
-    headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ text: slidesSourceCode }) 
-  })
-  .then(response => response.json())
-  .then((response: RenderSlidesPostResponse) => response.renderedSlides)
+  return url.substring(poundIdx + 2);
+}
+
+async function saveSlidesToServer(slidesSourceCode: string): Promise<string> {
+  return fetch("save", { 
+      method: "POST", 
+      headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ text: slidesSourceCode }) 
+  }).then((response) => response.text());
 }
 
 async function renderSlidesToIframe(slidesFrame: HTMLIFrameElement, slidesSourceCode: string) {
   const currentSlideId = findRevealInstance(slidesFrame)?.getCurrentSlide()?.id;
-  
-  const renderedSlidesHtml = await renderSlidesOnServer(slidesSourceCode);
 
-  slidesFrame.srcdoc = renderedSlidesHtml;
+  const savedSlidesId = await saveSlidesToServer(slidesSourceCode);
+  const newSlidesAddress = `/render?slides_id=${savedSlidesId}`;
+
+  slidesFrame.src = newSlidesAddress;
   slidesFrame.onload = function(this: HTMLIFrameElement) {
     const revealInstance = findRevealInstance(this);
     if (!revealInstance || !currentSlideId) return;
@@ -200,7 +205,7 @@ function findRevealInstance(iframe: HTMLIFrameElement): RevealStatic | undefined
 }
 
 function navigateToSlideId(reveal: RevealStatic, slideId: string) {
-  const slideToSelect = reveal.getSlides().find(slide => slide.id === slideId);
+  const slideToSelect = reveal.getSlides().find((slide) => slide.id == slideId);
 
   if (slideToSelect) {
     const { h, v } = reveal.getIndices(slideToSelect);
