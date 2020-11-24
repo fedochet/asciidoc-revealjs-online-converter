@@ -14,7 +14,7 @@ import asciidoctorRevealjs from '@asciidoctor/reveal.js';
 asciidoctorRevealjs.register();
 
 const PORT = process.env.PORT || 5000;
-const SAVED_SLIDES_CACHE_TTL_MS = parseInt(process.env.SAVED_SLIDES_CACHE_TTL_MS ?? "10_000");
+const SAVED_SLIDES_CACHE_TTL_MS = parseInt(process.env.SAVED_SLIDES_CACHE_TTL_MS ?? "10000");
 
 express()
   .use(bodyParser.json())
