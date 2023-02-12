@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.162",
-    "@types/react-router-dom": "^5.1.6"
+    "@types/react-router-dom": "^5.1.6",
+    "monaco-editor": "0.35.0"
   }
 }
