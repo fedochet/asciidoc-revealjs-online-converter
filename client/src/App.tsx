@@ -114,7 +114,7 @@ class LiveEditingEditorComponent extends React.Component {
           <Editor
             language='asciidoc'
             value={SAMPLE_SLIDES_TEXT}
-            editorDidMount={(_, editor) => this.setupEditor(editor)}
+            onMount={(editor, _) => this.setupEditor(editor)}
             options={{
               wordWrap: "off"
             }}
